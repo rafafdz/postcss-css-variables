@@ -60,7 +60,11 @@ var defaults = {
   preserveInjectedVariables: true,
   // Will write media queries in the same order as in the original file.
   // Currently defaulted to false for legacy behavior. We can update to `true` in a major version
-  preserveAtRulesOrder: false
+  preserveAtRulesOrder: false,
+
+  includePaths: [],
+
+  silent: false,
 };
 
 module.exports = (options = {}) => {
@@ -72,7 +76,13 @@ module.exports = (options = {}) => {
     postcssPlugin: 'postcss-css-variables',
     Once(css, { decl, result, rule }) {
       // Transform CSS AST here
+      
+      const filename = css.source.input.file
 
+      if (opts.includePaths.length) {
+        const matches =  opts.includePaths.some(path => filename.includes(path))
+        if (!matches) return
+      }
       /* * /
       try {
       /* */
@@ -141,6 +151,9 @@ module.exports = (options = {}) => {
       // Chainable helper function to log any messages (warnings)
       var logResolveValueResult = function(valueResult) {
         // Log any warnings that might of popped up
+
+        if (opts.silent) return valueResult;
+
         var warningList = [].concat(valueResult.warnings);
         warningList.forEach(function(warningArgs) {
           warningArgs = [].concat(warningArgs);
@@ -158,7 +171,7 @@ module.exports = (options = {}) => {
       eachCssVariableDeclaration(css, function(decl) {
         var declParentRule = decl.parent;
 
-        var valueResults = logResolveValueResult(resolveValue(decl, map));
+        var valueResults = logResolveValueResult(resolveValue(decl, map, undefined, undefined));
         // Split out each selector piece into its own declaration for easier logic down the road
         decl.parent.selectors.forEach(function(selector) {
           // Create a detached clone

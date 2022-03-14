@@ -14377,7 +14377,7 @@ System.registerDynamic('npm:postcss-css-variables@0.14.0/lib/resolve-value.js', 
 			}
 
 			isResultantValueUndefined = replaceValue === undefined;
-			if (isResultantValueUndefined) {
+			if (isResultantValueUndefined && !silent) {
 				warnings.push(['variable ' + variableName + ' is undefined and used without a fallback', { node: decl }]);
 			}
 
